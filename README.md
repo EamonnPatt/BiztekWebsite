@@ -1,50 +1,58 @@
-# Biztek Group — Website Monorepo
+# Biztek Group — Website
 
-Static marketing sites for The Biztek Group. Each site under `sites/` is self-contained (plain HTML/CSS/JS, no build step) and shares the same six pages and content, but with a completely different visual identity.
+Static marketing site for The Biztek Group. Plain HTML/CSS/JS with no build step or dependencies to install — dark tech-network aesthetic built around a cyan/violet palette.
 
 ```
 BiztekWebsite/
-└── sites/
-    ├── nexus/      dark, tech-network aesthetic (cyan/violet, animated 3D sphere hero)
-    ├── ember/      warm neo-brutalist aesthetic (cream/coral, animated gradient blobs, custom cursor)
-    ├── terminal/   developer/CRT terminal aesthetic (phosphor green-on-black, scanlines, typewriter hero, live log feed)
-    └── converge/   nexus's palette, rebuilt homepage: bespoke "connected business" network diagrams, scroll narrative, interactive stats, problem-first CTA
-```
-
-Every site has the same internal structure:
-
-```
-sites/<name>/
 ├── index.html
 ├── about.html
 ├── services.html
 ├── industries.html
 ├── case-studies.html
 ├── contact.html
-├── css/styles.css   (shared stylesheet for every page in that site)
-└── js/main.js       (shared nav + scroll-reveal logic; sites may add extra page-specific scripts)
+├── css/
+│   └── styles.css          shared stylesheet for every page
+├── js/
+│   ├── main.js             nav, scroll reveal, ambient background (all pages)
+│   ├── hero-canvas.js      3D network sphere in the hero (index only)
+│   └── system-network.js   interactive system diagram (index only)
+└── img/
+    └── biztek-logo.png
 ```
 
 ## Running locally
 
-No build tools required — just serve the folder statically and open `index.html`.
+Serve the folder statically from the repo root:
 
 ```bash
-# nexus
-npx --yes serve sites/nexus -l 5173
-
-# ember
-npx --yes serve sites/ember -l 5174
-
-# terminal
-npx --yes serve sites/terminal -l 5175
-
-# converge
-npx --yes serve sites/converge -l 5176
+npx --yes serve . -l 5173
+# or
+python -m http.server 5173
 ```
 
-Or simply open `sites/<name>/index.html` directly in a browser.
+Then open <http://localhost:5173>.
 
-## Adding a new site
+Opening `index.html` directly from the filesystem mostly works, but serve it over HTTP if you want the hero canvas and web fonts to load reliably.
 
-Duplicate the folder structure above under `sites/<new-name>/`, keeping the same six page filenames so cross-links and nav stay consistent. Content (copy, phone number, address) should stay in sync across sites unless a redesign intentionally changes it.
+## How it fits together
+
+Every page shares `css/styles.css` and `js/main.js`, and repeats the same header and footer markup inline — there is no templating layer, so **a nav or footer change has to be made in all six HTML files**.
+
+`js/main.js` handles three things across every page:
+
+- sticky-header scroll state and the mobile nav toggle
+- scroll reveal — elements marked `data-reveal` that start below the fold fade up as they enter view
+- the ambient background — a fixed layer of drifting blurred orbs plus a slow-moving grid, injected into the DOM at runtime so no page needs extra markup
+
+Theme colors, spacing, and radii are CSS custom properties on `:root` in `styles.css`. Change them there rather than in individual rules.
+
+Animation respects `prefers-reduced-motion`, and content stays fully visible with JavaScript disabled — the reveal and ambient layers are progressive enhancements.
+
+### External resources
+
+- **Google Fonts** (Sora, IBM Plex Sans, IBM Plex Mono) — imported at the top of `styles.css`
+- **three.js r128** — loaded from cdnjs in `index.html`, required by `hero-canvas.js`
+
+## Editing content
+
+Copy, phone number, and address live directly in the HTML. Contact details appear in the footer of all six pages and again on `contact.html`, so update them everywhere when they change.
